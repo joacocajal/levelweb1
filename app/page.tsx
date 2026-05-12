@@ -1053,13 +1053,13 @@ function DropCountdownOverlay({ onGone }: { onGone(): void }) {
               padding: '0 clamp(24px, 6vw, 80px)',
               display: 'flex', flexDirection: 'column',
               alignItems: 'center', justifyContent: 'center',
-              gap: 'clamp(28px, 5vh, 60px)',
+              gap: 'clamp(16px, 3vh, 36px)',
               opacity: contentOp,
             }}>
               <Image
                 src="/img/logorojosf.png" alt="LEVEL" width={700} height={700} priority
                 style={{
-                  width: 'clamp(260px, 52vw, 560px)',
+                  width: 'clamp(160px, min(38vw, 36vh), 400px)',
                   height: 'auto', objectFit: 'contain',
                   filter: 'drop-shadow(0 0 80px rgba(192,57,43,0.35)) drop-shadow(0 0 30px rgba(192,57,43,0.2))',
                 }}
@@ -1069,16 +1069,16 @@ function DropCountdownOverlay({ onGone }: { onGone(): void }) {
               {timeLeft !== null ? (
                 <div style={{
                   display: 'flex', alignItems: 'flex-start',
-                  gap: 'clamp(12px, 3vw, 56px)',
+                  gap: 'clamp(12px, 3vw, 48px)',
                 }}>
                   {units.map(({ label, v }) => (
                     <div key={label} style={{
                       display: 'flex', flexDirection: 'column',
-                      alignItems: 'center', gap: 'clamp(6px, 1vh, 14px)',
+                      alignItems: 'center', gap: 'clamp(5px, 1vh, 10px)',
                     }}>
                       <span style={{
                         ...B,
-                        fontSize: 'clamp(3rem, 10vw, 9rem)',
+                        fontSize: 'clamp(2.8rem, min(9vw, 10vh), 7.5rem)',
                         color: '#fff', lineHeight: 1,
                         letterSpacing: '-0.01em',
                         display: 'block',
@@ -1094,7 +1094,7 @@ function DropCountdownOverlay({ onGone }: { onGone(): void }) {
                 </div>
               ) : (
                 /* Placeholder reserves height while countdown loads */
-                <div style={{ height: 'clamp(52px, 12vw, 140px)' }} />
+                <div style={{ height: 'clamp(48px, 10vh, 120px)' }} />
               )}
 
               <p style={{
@@ -1105,14 +1105,16 @@ function DropCountdownOverlay({ onGone }: { onGone(): void }) {
               }}>
                 Lunes 18 · Mayo 2026 · 19:00 hs
               </p>
+            </div>
 
-              <div style={{
-                position: 'absolute', bottom: 32,
-                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10,
-              }}>
-                <span style={{ ...I, fontSize: 9, letterSpacing: '0.5em', textTransform: 'uppercase', color: '#0e0e0e' }}>Scroll</span>
-                <div style={{ width: 1, height: 48, background: `linear-gradient(to bottom, ${RED}, transparent)` }} />
-              </div>
+            {/* Scroll hint — fuera del flex de contenido, siempre en el fondo */}
+            <div style={{
+              position: 'absolute', bottom: 32, left: 0, right: 0,
+              display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10,
+              opacity: contentOp, pointerEvents: 'none',
+            }}>
+              <span style={{ ...I, fontSize: 9, letterSpacing: '0.5em', textTransform: 'uppercase', color: '#0e0e0e' }}>Scroll</span>
+              <div style={{ width: 1, height: 48, background: `linear-gradient(to bottom, ${RED}, transparent)` }} />
             </div>
 
             {/* Slogan (fades in on scroll) */}
