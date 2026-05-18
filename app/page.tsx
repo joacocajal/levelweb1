@@ -1062,6 +1062,7 @@ function DropCountdownOverlay({ onGone }: { onGone(): void }) {
                 style={{
                   width: 'clamp(180px, min(46vw, 36vh), 420px)',
                   height: 'auto', display: 'block',
+                  filter: 'drop-shadow(0 0 80px rgba(192,57,43,0.35)) drop-shadow(0 0 30px rgba(192,57,43,0.2))',
                 }}
               />
 
