@@ -1,10 +1,8 @@
 'use client'
 
 import Image from 'next/image'
-import { useRef, useState, useEffect, useCallback } from 'react'
+import { useRef, useState, useEffect } from 'react'
 import Lenis from 'lenis'
-import gsap from 'gsap'
-import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import {
   motion,
   useScroll,
@@ -29,9 +27,6 @@ function sb() {
 const RED = '#c0392b'
 const B = { fontFamily: "'Bebas Neue', sans-serif" } satisfies React.CSSProperties
 const I = { fontFamily: 'Inter, sans-serif'        } satisfies React.CSSProperties
-
-// Lunes 18/05/2026 19:00 ART = 22:00 UTC
-const DROP_TARGET = new Date('2026-05-18T22:00:00Z')
 
 // ─── Motion variants ──────────────────────────────────────────────────────────
 const fadeUp: Variants = {
@@ -65,10 +60,6 @@ const KEYFRAMES = `
     86%{text-shadow:none}
     88%{text-shadow:3px 0 #f06,-3px 0 #0ff}
     90%{text-shadow:none}
-  }
-  @keyframes arrowPulse {
-    0%,100%{box-shadow:0 0 0 0 rgba(192,57,43,0.6)}
-    50%{box-shadow:0 0 0 14px rgba(192,57,43,0)}
   }
 `
 
@@ -432,399 +423,79 @@ function EasterEggModal({ onClose, onClaim }: { onClose(): void; onClaim(): void
   )
 }
 
-// ─── Static Hero ──────────────────────────────────────────────────────────────
-// Primera pantalla: logo rojo centrado, fondo negro puro. Sin video, sin scroll.
-// Carga instantánea, impacto máximo.
-function StaticHero() {
+// ─── Hero ─────────────────────────────────────────────────────────────────────
+function Hero({ onEasterEgg }: { onEasterEgg(): void }) {
   return (
     <section style={{
-      height: '100vh', background: '#000000',
-      display: 'flex', flexDirection: 'column',
-      alignItems: 'center', justifyContent: 'center',
-      position: 'relative', overflow: 'hidden',
+      minHeight: '100vh', background: '#000', position: 'relative', overflow: 'hidden',
+      display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+      padding: 'clamp(80px,10vw,120px) 24px', textAlign: 'center',
     }}>
-      {/* Grid sutil */}
+      {/* Subtle grid */}
       <div aria-hidden style={{
         position: 'absolute', inset: 0, pointerEvents: 'none',
-        backgroundImage: 'linear-gradient(rgba(255,255,255,0.013) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.013) 1px,transparent 1px)',
+        backgroundImage: 'linear-gradient(rgba(255,255,255,0.016) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.016) 1px,transparent 1px)',
         backgroundSize: '72px 72px',
       }} />
 
-      {/* Badge */}
-      <motion.span
-        initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.7, ease: 'easeOut' }}
-        style={{ ...I, display: 'inline-block', padding: '5px 20px', border: '1px solid #161616', color: '#2a2a2a', fontSize: 10, letterSpacing: '0.48em', textTransform: 'uppercase', marginBottom: 48, position: 'relative', zIndex: 1 }}
-      >
-        Drop 00 · Edición Limitada
-      </motion.span>
-
-      {/* Logo — centrado, glow rojo */}
       <motion.div
-        initial={{ opacity: 0, scale: 0.92 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 1.1, ease: [0.22, 1, 0.36, 1], delay: 0.08 }}
-        style={{ position: 'relative', zIndex: 1 }}
+        variants={stag} initial="hidden" animate="show"
+        style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 24 }}
       >
-        <Image src="/img/logorojosf.png" alt="LEVEL" width={700} height={700} priority
+        {/* Badge */}
+        <motion.span variants={fadeUp} style={{
+          ...I, display: 'inline-block', padding: '5px 18px',
+          border: '1px solid #1a1a1a', color: '#4a4a4a',
+          fontSize: 10, letterSpacing: '0.42em', textTransform: 'uppercase',
+        }}>
+          Drop 00 · Edición Limitada
+        </motion.span>
+
+        {/* Logo — Mobile: 240px min / Desktop: 600px max */}
+        <motion.div variants={fadeUp}>
+          <Image
+            src="/img/logorojosf.png" alt="LEVEL"
+            width={700} height={700} priority
+            style={{
+              width: 'clamp(240px, 52vw, 600px)',
+              height: 'auto', objectFit: 'contain',
+              filter: 'drop-shadow(0 0 48px rgba(192,57,43,0.18))',
+            }}
+          />
+        </motion.div>
+
+        {/* Slogan — doble clic → Easter Egg */}
+        <motion.h1
+          variants={fadeUp}
+          onDoubleClick={onEasterEgg}
           style={{
-            width: 'clamp(280px, 58vw, 680px)',
-            height: 'auto', objectFit: 'contain',
-            filter: `drop-shadow(0 0 90px rgba(192,57,43,0.45)) drop-shadow(0 0 30px rgba(192,57,43,0.25))`,
+            ...B, fontSize: 'clamp(3.4rem,12vw,9.5rem)',
+            lineHeight: 0.86, letterSpacing: '0.02em',
+            color: '#fff', cursor: 'default', userSelect: 'none',
           }}
-        />
-      </motion.div>
+        >
+          WE ARE THE<br />NEXT LEVEL
+        </motion.h1>
 
-      {/* Flecha de scroll animada */}
-      <motion.div
-        initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.6, duration: 1 }}
-        style={{ position: 'absolute', bottom: 36, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10, zIndex: 1 }}
-      >
-        <span style={{ ...I, fontSize: 9, letterSpacing: '0.52em', textTransform: 'uppercase', color: '#181818' }}>Scroll</span>
-        <div style={{ width: 1, height: 52, background: `linear-gradient(to bottom, ${RED}, transparent)` }} />
+        <motion.p variants={fadeUp} style={{
+          ...I, fontSize: '0.68rem', letterSpacing: '0.38em',
+          textTransform: 'uppercase', color: '#3a3a3a',
+        }}>
+          13 Piezas · Sin reposición · AW 2026
+        </motion.p>
+
+        <motion.div
+          initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 2, duration: 1.2 }}
+          style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 8 }}
+        >
+          <span style={{ ...I, fontSize: 9, letterSpacing: '0.38em', textTransform: 'uppercase', color: '#1c1c1c' }}>
+            Scroll para ver la colección
+          </span>
+          <div style={{ width: 32, height: 1, background: '#181818' }} />
+          <span style={{ color: '#1c1c1c', fontSize: 12 }}>↓</span>
+        </motion.div>
       </motion.div>
     </section>
-  )
-}
-
-// ─── Nav Arrow ────────────────────────────────────────────────────────────────
-function NavArrow({ dir, onClick }: { dir: 'left' | 'right'; onClick(): void }) {
-  const [hov, setHov] = useState(false)
-  return (
-    <button
-      onClick={onClick}
-      onMouseEnter={() => setHov(true)}
-      onMouseLeave={() => setHov(false)}
-      aria-label={dir === 'left' ? 'Anterior' : 'Siguiente'}
-      style={{
-        position: 'absolute',
-        [dir === 'left' ? 'left' : 'right']: 24,
-        top: '50%',
-        transform: 'translateY(-50%)',
-        animation: 'arrowPulse 2s ease-in-out infinite',
-        zIndex: 60,
-        background: hov ? `${RED}22` : 'transparent',
-        border: `2px solid ${RED}`,
-        color: hov ? '#fff' : RED,
-        width: 72, height: 72,
-        cursor: 'pointer',
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        fontSize: 28, transition: 'background 0.2s, color 0.2s',
-        fontFamily: 'sans-serif',
-      }}
-    >
-      {dir === 'left' ? '←' : '→'}
-    </button>
-  )
-}
-
-// ─── Waitlist Form ────────────────────────────────────────────────────────────
-function WaitlistForm() {
-  const [email,   setEmail]   = useState('')
-  const [done,    setDone]    = useState(false)
-  const [sending, setSending] = useState(false)
-
-  const submit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!email.trim()) return
-    setSending(true)
-    try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      await (sb().from('waitlist_level') as any).insert([{ email: email.trim() }])
-    } catch (err) { console.error('[LEVEL] Waitlist:', err) }
-    setDone(true)
-    setSending(false)
-  }
-
-  return (
-    <motion.section
-      variants={stag} initial="hidden" whileInView="show" viewport={vp}
-      style={{
-        minHeight: '80vh', background: '#000',
-        display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-        padding: 'clamp(60px,10vw,120px) clamp(24px,8vw,80px)',
-        textAlign: 'center',
-      }}
-    >
-      <motion.p variants={fadeUp} style={{ ...I, fontSize: 10, letterSpacing: '0.42em', textTransform: 'uppercase', color: '#3a3a3a', marginBottom: 16 }}>
-        Comunidad · Drop 00
-      </motion.p>
-      <motion.h2 variants={fadeUp} style={{ ...B, fontSize: 'clamp(2rem,6vw,3.5rem)', letterSpacing: '0.03em', color: '#fff', lineHeight: 0.9, marginBottom: 16 }}>
-        ENTRAR A LA LISTA
-      </motion.h2>
-      <motion.div variants={fadeUp} style={{ width: 32, height: 1, background: RED, marginBottom: 48 }} />
-
-      <AnimatePresence mode="wait">
-        {done ? (
-          <motion.div key="done" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.45 }}>
-            <p style={{ ...B, fontSize: 'clamp(1.4rem,4vw,2.2rem)', color: RED, letterSpacing: '0.06em' }}>ESTÁS DENTRO.</p>
-            <p style={{ ...I, fontSize: '0.85rem', color: '#3a3a3a', marginTop: 16, lineHeight: 1.9 }}>
-              Te avisamos en cada drop exclusivo.
-            </p>
-          </motion.div>
-        ) : (
-          <motion.form key="form" variants={fadeUp} onSubmit={submit}
-            style={{ display: 'flex', flexDirection: 'column', gap: 16, width: '100%', maxWidth: 400 }}
-          >
-            <input
-              type="email" value={email} onChange={e => setEmail(e.target.value)}
-              placeholder="tu@email.com" required
-              style={{
-                ...I, background: 'transparent', border: 'none',
-                borderBottom: '1px solid #1a1a1a', color: '#fff', fontSize: 15,
-                padding: '14px 0', outline: 'none', letterSpacing: '0.05em', textAlign: 'center',
-              }}
-            />
-            <button type="submit" disabled={sending} style={{
-              ...B, fontSize: 'clamp(0.75rem,2.2vw,0.92rem)', letterSpacing: '0.22em',
-              padding: '16px 24px', minHeight: 50,
-              background: sending ? '#111' : RED, border: 'none', color: '#fff',
-              cursor: sending ? 'default' : 'pointer', transition: 'background 0.18s',
-            }}>
-              {sending ? 'ENVIANDO…' : 'UNIRME A LA LISTA'}
-            </button>
-          </motion.form>
-        )}
-      </AnimatePresence>
-    </motion.section>
-  )
-}
-
-// ─── HorizontalNav — grid bidireccional (3 col × scroll vertical interno) ─────
-// Wrapper: 100vw × 100vh, overflow:hidden — el window scroll NO entra aquí
-// Track: 300vw flex, animado en X con GSAP power3.inOut
-// Columns: 100vw × 100vh, overflow-y: auto — scroll interno independiente
-// Swipe táctil: detecta sólo gestos predominantemente horizontales
-function HorizontalNav({ onEasterEgg }: { onEasterEgg(): void }) {
-  const [col, setCol] = useState(0)
-  const [navLocked, setNavLocked] = useState(false)
-  const navLockedRef = useRef(false)
-  const wrapRef  = useRef<HTMLDivElement>(null)
-  const trackRef = useRef<HTMLDivElement>(null)
-  const col1Ref  = useRef<HTMLDivElement>(null)
-  const col2Ref  = useRef<HTMLDivElement>(null)
-  const col3Ref  = useRef<HTMLDivElement>(null)
-
-  const goTo = useCallback((idx: number) => {
-    if (navLockedRef.current) return
-    if (!trackRef.current) return
-    gsap.to(trackRef.current, {
-      x: -(idx * window.innerWidth),
-      duration: 0.85,
-      ease: 'power3.inOut',
-    })
-    setCol(idx)
-  }, [])
-
-  // Wheel handler — redirige el scroll de rueda al div de la columna activa.
-  // Lenis intercepta los eventos de window; este handler con passive:false
-  // los captura primero y los envía al contenedor interno correcto.
-  useEffect(() => {
-    const colRefs = [col1Ref, col2Ref, col3Ref]
-    const cleanups: (() => void)[] = []
-
-    colRefs.forEach(ref => {
-      const el = ref.current
-      if (!el) return
-      const fn = (e: WheelEvent) => {
-        const atTop    = el.scrollTop <= 0
-        const atBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 2
-        // Scroll up desde el tope → deja que el window suba (vuelve al video)
-        if (e.deltaY < 0 && atTop) return
-        // Ya en el fondo → no hace nada
-        if (e.deltaY > 0 && atBottom) return
-        el.scrollTop += e.deltaY
-        e.preventDefault()
-        e.stopPropagation()
-      }
-      el.addEventListener('wheel', fn, { passive: false })
-      cleanups.push(() => el.removeEventListener('wheel', fn))
-    })
-    return () => cleanups.forEach(fn => fn())
-  }, [])
-
-  // Swipe táctil — sólo dispara si el gesto es más horizontal que vertical
-  useEffect(() => {
-    const el = wrapRef.current
-    if (!el) return
-    let sx = 0, sy = 0
-    const onStart = (e: TouchEvent) => { sx = e.touches[0].clientX; sy = e.touches[0].clientY }
-    const onEnd   = (e: TouchEvent) => {
-      if (navLockedRef.current) return
-      const dx = e.changedTouches[0].clientX - sx
-      const dy = e.changedTouches[0].clientY - sy
-      if (Math.abs(dx) < 60 || Math.abs(dy) > Math.abs(dx) * 0.8) return
-      setCol(c => {
-        const n = dx < 0 ? Math.min(c + 1, 2) : Math.max(c - 1, 0)
-        if (n !== c && trackRef.current)
-          gsap.to(trackRef.current, { x: -(n * window.innerWidth), duration: 0.85, ease: 'power3.inOut' })
-        return n
-      })
-    }
-    el.addEventListener('touchstart', onStart, { passive: true })
-    el.addEventListener('touchend', onEnd)
-    return () => { el.removeEventListener('touchstart', onStart); el.removeEventListener('touchend', onEnd) }
-  }, [])
-
-  // Bloquea nav horizontal cuando la columna activa tiene scroll interno
-  useEffect(() => {
-    const colEls = [col1Ref.current, col2Ref.current, col3Ref.current]
-    const el = colEls[col]
-    if (!el) return
-    const sync = () => {
-      const lk = el.scrollTop > 80
-      navLockedRef.current = lk
-      setNavLocked(lk)
-    }
-    sync()
-    el.addEventListener('scroll', sync, { passive: true })
-    return () => el.removeEventListener('scroll', sync)
-  }, [col])
-
-  const colStyle: React.CSSProperties = {
-    width: '100vw', height: '100vh',
-    overflowY: 'auto', overflowX: 'hidden',
-    flexShrink: 0, position: 'relative',
-  }
-
-  const GRID = 'linear-gradient(rgba(255,255,255,0.016) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.016) 1px,transparent 1px)'
-
-  return (
-    <div ref={wrapRef} style={{ position: 'relative', width: '100vw', height: '100vh', overflow: 'hidden', background: '#000' }}>
-
-      {/* Flechas de navegación lateral */}
-      {!navLocked && col > 0 && <NavArrow dir="left"  onClick={() => goTo(col - 1)} />}
-      {!navLocked && col < 2 && <NavArrow dir="right" onClick={() => goTo(col + 1)} />}
-
-      {/* Indicadores de columna activa */}
-      <div style={{ position: 'absolute', bottom: 20, left: '50%', transform: 'translateX(-50%)', display: 'flex', gap: 8, zIndex: 60 }}>
-        {[0, 1, 2].map(i => (
-          <button key={i} onClick={() => goTo(i)} aria-label={`Columna ${i + 1}`} style={{
-            width: 6, height: 6, borderRadius: '50%', border: 'none', padding: 0,
-            background: col === i ? RED : '#1c1c1c',
-            cursor: 'pointer', transition: 'background 0.3s',
-          }} />
-        ))}
-      </div>
-
-      {/* Track — 300vw */}
-      <div ref={trackRef} style={{ display: 'flex', width: '300vw', height: '100%', willChange: 'transform' }}>
-
-        {/* ── COLUMNA 1: Eslogan + Historia + Footer ── */}
-        <div ref={col1Ref} style={colStyle}>
-          {/* Eslogan */}
-          <section style={{
-            minHeight: '100vh', background: '#0c0c0c', position: 'relative', overflow: 'hidden',
-            display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-            padding: 'clamp(80px,10vw,120px) 24px', textAlign: 'center',
-          }}>
-            <div aria-hidden style={{ position: 'absolute', inset: 0, pointerEvents: 'none', backgroundImage: GRID, backgroundSize: '72px 72px' }} />
-            <motion.div variants={stag} initial="hidden" animate="show"
-              style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 24 }}
-            >
-              <motion.span variants={fadeUp} style={{ ...I, display: 'inline-block', padding: '5px 18px', border: '1px solid #1a1a1a', color: '#4a4a4a', fontSize: 10, letterSpacing: '0.42em', textTransform: 'uppercase' }}>
-                Drop 00 · Edición Limitada
-              </motion.span>
-              <motion.div variants={fadeUp}>
-                <Image src="/img/logorojosf.png" alt="LEVEL" width={700} height={700} priority
-                  style={{ width: 'clamp(240px,52vw,600px)', height: 'auto', objectFit: 'contain', filter: 'drop-shadow(0 0 48px rgba(192,57,43,0.18))' }} />
-              </motion.div>
-              <motion.h1 variants={fadeUp} onDoubleClick={onEasterEgg}
-                style={{ ...B, fontSize: '18vw', lineHeight: 0.82, letterSpacing: '0.02em', color: '#fff', cursor: 'default', userSelect: 'none' }}>
-                WE ARE THE<br />NEXT LEVEL
-              </motion.h1>
-              <motion.p variants={fadeUp} style={{ ...I, fontSize: '0.68rem', letterSpacing: '0.38em', textTransform: 'uppercase', color: '#3a3a3a' }}>
-                13 Piezas · Sin reposición · AW 2026
-              </motion.p>
-              {/* Hint de navegación horizontal → */}
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 2.2, duration: 1.2 }}
-                style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 8 }}
-              >
-                <span style={{ ...I, fontSize: 9, letterSpacing: '0.38em', textTransform: 'uppercase', color: '#1c1c1c' }}>
-                  → El Drop
-                </span>
-                <div style={{ width: 32, height: 1, background: '#181818' }} />
-                <span style={{ ...I, fontSize: 9, letterSpacing: '0.38em', textTransform: 'uppercase', color: '#1c1c1c' }}>
-                  ↓ Nuestra historia
-                </span>
-              </motion.div>
-            </motion.div>
-          </section>
-          <Historia />
-          <footer style={{ background: '#000', borderTop: '1px solid #080808', padding: '40px 24px', textAlign: 'center' }}>
-            <p style={{ ...I, fontSize: 10, letterSpacing: '0.42em', textTransform: 'uppercase', color: '#0e0e0e' }}>
-              © 2026 Level · Drop 00 · Todos los derechos reservados
-            </p>
-          </footer>
-        </div>
-
-        {/* ── COLUMNA 2: El Drop + Cartas (scroll interno, containerRef) ── */}
-        <div ref={col2Ref} style={colStyle}>
-          {/* Drop header */}
-          <section style={{
-            minHeight: '100vh', background: '#000', position: 'relative', overflow: 'hidden',
-            display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-            padding: 'clamp(80px,10vw,120px) 24px', textAlign: 'center',
-          }}>
-            <div aria-hidden style={{ position: 'absolute', inset: 0, pointerEvents: 'none', backgroundImage: GRID, backgroundSize: '72px 72px' }} />
-            <motion.div variants={stag} initial="hidden" animate={col === 1 ? 'show' : 'hidden'}
-              style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 20 }}
-            >
-              <motion.p variants={fadeUp} style={{ ...I, fontSize: 10, letterSpacing: '0.42em', textTransform: 'uppercase', color: '#3a3a3a' }}>
-                El Producto
-              </motion.p>
-              <motion.h2 variants={fadeUp} style={{ ...B, fontSize: 'clamp(5rem,20vw,16rem)', letterSpacing: '0.03em', color: '#fff', lineHeight: 0.85 }}>
-                EL DROP
-              </motion.h2>
-              <motion.div variants={fadeUp} style={{ width: 32, height: 1, background: RED }} />
-              <motion.p variants={fadeUp} style={{ ...I, fontSize: '0.9rem', lineHeight: 2, color: '#484848', maxWidth: 440 }}>
-                Drop 00. 13 piezas. Sin reposición.<br />
-                Dos diseños que definen quién sos.
-              </motion.p>
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.5, duration: 1 }}
-                style={{ ...I, fontSize: 9, letterSpacing: '0.38em', textTransform: 'uppercase', color: '#1c1c1c', marginTop: 8 }}>
-                ↓ Scroll para ver la colección
-              </motion.div>
-            </motion.div>
-          </section>
-          {/* Cartas — containerRef conectado para que useScroll trackee scroll interno */}
-          <PhraseCard line1="TU IDENTIDAD" line2="NO SE NEGOCIA" product={PRODUCTS[0]} containerRef={col2Ref} />
-          <PhraseCard line1="VOS PONÉS"    line2="LAS REGLAS"    product={PRODUCTS[1]} containerRef={col2Ref} />
-        </div>
-
-        {/* ── COLUMNA 3: Comunidad + Waitlist ── */}
-        <div ref={col3Ref} style={colStyle}>
-          <section style={{
-            minHeight: '100vh', background: '#000', position: 'relative', overflow: 'hidden',
-            display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-            padding: 'clamp(80px,10vw,120px) clamp(24px,8vw,80px)', textAlign: 'center',
-          }}>
-            <div aria-hidden style={{ position: 'absolute', inset: 0, pointerEvents: 'none', backgroundImage: GRID, backgroundSize: '72px 72px' }} />
-            <motion.div variants={stag} initial="hidden" animate={col === 2 ? 'show' : 'hidden'}
-              style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 20 }}
-            >
-              <motion.p variants={fadeUp} style={{ ...I, fontSize: 10, letterSpacing: '0.42em', textTransform: 'uppercase', color: '#3a3a3a' }}>
-                Para los que llegaron primero
-              </motion.p>
-              <motion.h2 variants={fadeUp} style={{ ...B, fontSize: 'clamp(3rem,12vw,10rem)', letterSpacing: '0.02em', color: '#fff', lineHeight: 0.85 }}>
-                EXCLUSIVO DE<br />LA COMUNIDAD
-              </motion.h2>
-              <motion.div variants={fadeUp} style={{ width: 32, height: 1, background: RED }} />
-              <motion.p variants={fadeUp} style={{ ...I, fontSize: '0.9rem', lineHeight: 2, color: '#484848', maxWidth: 440 }}>
-                Los primeros en enterarse.<br />
-                Los primeros en elegir.
-              </motion.p>
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.2, duration: 1 }}
-                style={{ ...I, fontSize: 9, letterSpacing: '0.38em', textTransform: 'uppercase', color: '#1c1c1c', marginTop: 8 }}>
-                ↓ Scroll para anotarte
-              </motion.div>
-            </motion.div>
-          </section>
-          <WaitlistForm />
-        </div>
-
-      </div>
-    </div>
   )
 }
 
@@ -833,17 +504,12 @@ function HorizontalNav({ onEasterEgg }: { onEasterEgg(): void }) {
 // Frases: z-[1] opacity 1 → 0.05
 // Carta:  z-[10] entra desde el costado (x 100%→0%) con leve rotación (5deg→0deg)
 function PhraseCard({
-  line1, line2, product, containerRef,
+  line1, line2, product,
 }: {
   line1: string; line2: string; product: typeof PRODUCTS[number]
-  containerRef?: React.RefObject<HTMLDivElement | null>
 }) {
   const ref = useRef<HTMLDivElement>(null)
-  const { scrollYProgress } = useScroll({
-    target: ref,
-    ...(containerRef ? { container: containerRef } : {}),
-    offset: ['start start', 'end end'],
-  })
+  const { scrollYProgress } = useScroll({ target: ref, offset: ['start start', 'end end'] })
   const s = useSpring(scrollYProgress, { stiffness: 75, damping: 20, restDelta: 0.001 })
 
   // ── Phrases: aparecen full → se dividen → bajan a 0.05
@@ -956,210 +622,19 @@ function Historia() {
   )
 }
 
-// ─── Drop Countdown Overlay ───────────────────────────────────────────────────
-function DropCountdownOverlay({ onGone }: { onGone(): void }) {
-  const onGoneRef  = useRef(onGone)
-  const timerRef   = useRef<ReturnType<typeof setInterval> | null>(null)
-  const scrollRef  = useRef<HTMLDivElement>(null)
-
-  const [timeLeft,  setTimeLeft]  = useState<{ d: number; h: number; m: number; s: number } | null>(null)
-  const [fading,    setFading]    = useState(false)
-  const [alive,     setAlive]     = useState(true)
-  const [contentOp, setContentOp] = useState(1)
-  const [sloganOp,  setSloganOp]  = useState(0)
-
-  onGoneRef.current = onGone
-
-  useEffect(() => {
-    const tick = () => {
-      const diff = DROP_TARGET.getTime() - Date.now()
-      if (diff <= 0) {
-        setTimeLeft({ d: 0, h: 0, m: 0, s: 0 })
-        if (timerRef.current) clearInterval(timerRef.current)
-        setFading(true)
-        setTimeout(() => { setAlive(false); onGoneRef.current() }, 700)
-        return
-      }
-      setTimeLeft({
-        d: Math.floor(diff / 86400000),
-        h: Math.floor((diff % 86400000) / 3600000),
-        m: Math.floor((diff % 3600000) / 60000),
-        s: Math.floor((diff % 60000) / 1000),
-      })
-    }
-    tick()
-    timerRef.current = setInterval(tick, 1000)
-    return () => { if (timerRef.current) clearInterval(timerRef.current) }
-  }, [])
-
-  useEffect(() => {
-    const el = scrollRef.current
-    if (!el) return
-    const handle = () => {
-      const p = Math.max(0, Math.min(1, (el.scrollTop - 80) / 520))
-      setContentOp(1 - p)
-      setSloganOp(p)
-    }
-    el.addEventListener('scroll', handle, { passive: true })
-    return () => el.removeEventListener('scroll', handle)
-  }, [])
-
-  if (!alive) return null
-
-  const pad = (n: number) => String(n).padStart(2, '0')
-  const units = [
-    { label: 'DÍAS', v: timeLeft?.d ?? 0 },
-    { label: 'HRS',  v: timeLeft?.h ?? 0 },
-    { label: 'MIN',  v: timeLeft?.m ?? 0 },
-    { label: 'SEG',  v: timeLeft?.s ?? 0 },
-  ]
-
-  return (
-    <>
-      <style>{`.lvl-ov::-webkit-scrollbar{display:none}`}</style>
-      <div
-        ref={scrollRef}
-        className="lvl-ov"
-        style={{
-          position: 'fixed', inset: 0, zIndex: 10000,
-          background: '#000',
-          overflowY: 'scroll', overflowX: 'hidden',
-          scrollbarWidth: 'none',
-          opacity: fading ? 0 : 1,
-          transition: fading ? 'opacity 0.7s ease' : 'none',
-        }}
-      >
-        {/* Grain — unique filter id to avoid conflict with FilmGrain */}
-        <div aria-hidden style={{
-          position: 'fixed', top: '-50%', left: '-50%',
-          width: '200%', height: '200%',
-          pointerEvents: 'none', opacity: 0.025,
-          backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 300'%3E%3Cfilter id='noise-ov'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise-ov)'/%3E%3C/svg%3E")`,
-          backgroundRepeat: 'repeat', backgroundSize: '220px 220px',
-          animation: 'grain 0.35s steps(1) infinite',
-        }} />
-
-        {/* Tall spacer enables scroll inside the fixed layer */}
-        <div style={{ height: '250vh' }}>
-          <div style={{
-            position: 'sticky', top: 0, height: '100vh',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            overflow: 'hidden',
-          }}>
-
-            {/* Logo + countdown (fades out on scroll) */}
-            <div style={{
-              position: 'absolute', inset: 0,
-              padding: '0 clamp(24px, 6vw, 80px)',
-              display: 'flex', flexDirection: 'column',
-              alignItems: 'center', justifyContent: 'center',
-              gap: 'clamp(16px, 3vh, 36px)',
-              opacity: contentOp,
-            }}>
-              <Image
-                src="/img/logorojosf.png" alt="LEVEL" width={700} height={700} priority
-                style={{
-                  width: 'clamp(160px, min(38vw, 36vh), 400px)',
-                  height: 'auto', objectFit: 'contain',
-                  filter: 'drop-shadow(0 0 80px rgba(192,57,43,0.35)) drop-shadow(0 0 30px rgba(192,57,43,0.2))',
-                }}
-              />
-
-              {/* Countdown — only rendered after client hydration to avoid flash */}
-              {timeLeft !== null ? (
-                <div style={{
-                  display: 'flex', alignItems: 'flex-start',
-                  gap: 'clamp(12px, 3vw, 48px)',
-                }}>
-                  {units.map(({ label, v }) => (
-                    <div key={label} style={{
-                      display: 'flex', flexDirection: 'column',
-                      alignItems: 'center', gap: 'clamp(5px, 1vh, 10px)',
-                    }}>
-                      <span style={{
-                        ...B,
-                        fontSize: 'clamp(2.8rem, min(9vw, 10vh), 7.5rem)',
-                        color: '#fff', lineHeight: 1,
-                        letterSpacing: '-0.01em',
-                        display: 'block',
-                      }}>{pad(v)}</span>
-                      <span style={{
-                        ...I,
-                        fontSize: 'clamp(9px, 1.3vw, 12px)',
-                        letterSpacing: '0.42em', textTransform: 'uppercase',
-                        color: '#666',
-                      }}>{label}</span>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                /* Placeholder reserves height while countdown loads */
-                <div style={{ height: 'clamp(48px, 10vh, 120px)' }} />
-              )}
-
-              <p style={{
-                ...I,
-                fontSize: 'clamp(10px, 1.4vw, 13px)',
-                letterSpacing: '0.38em', textTransform: 'uppercase',
-                color: '#555',
-              }}>
-                Lunes 18 · Mayo 2026 · 19:00 hs
-              </p>
-            </div>
-
-            {/* Scroll hint — fuera del flex de contenido, siempre en el fondo */}
-            <div style={{
-              position: 'absolute', bottom: 32, left: 0, right: 0,
-              display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10,
-              opacity: contentOp, pointerEvents: 'none',
-            }}>
-              <span style={{ ...I, fontSize: 9, letterSpacing: '0.5em', textTransform: 'uppercase', color: '#0e0e0e' }}>Scroll</span>
-              <div style={{ width: 1, height: 48, background: `linear-gradient(to bottom, ${RED}, transparent)` }} />
-            </div>
-
-            {/* Slogan (fades in on scroll) */}
-            <div style={{
-              position: 'absolute', inset: 0,
-              padding: '0 clamp(24px, 6vw, 80px)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              opacity: sloganOp, pointerEvents: 'none',
-            }}>
-              <p style={{
-                ...B,
-                fontSize: 'clamp(2.8rem, 9vw, 8.5rem)',
-                color: '#fff', letterSpacing: '0.04em',
-                textAlign: 'center', lineHeight: 0.9,
-              }}>
-                WE ARE THE<br />NEXT LEVEL
-              </p>
-            </div>
-
-          </div>
-        </div>
-      </div>
-    </>
-  )
-}
-
 // ─── Page ─────────────────────────────────────────────────────────────────────
 export default function Home() {
-  const [eggOpen,     setEggOpen]     = useState(false)
-  const [isFunder,    setIsFunder]    = useState(false)
-  // Lazy init: false immediately if the drop already happened (no flash, no effect needed)
-  const [showOverlay, setShowOverlay] = useState(() => Date.now() < DROP_TARGET.getTime())
+  const [eggOpen,  setEggOpen]  = useState(false)
+  const [isFunder, setIsFunder] = useState(false)
 
-  // Lenis smooth scroll — se inicializa solo cuando el overlay ya no está,
-  // para que no intercepte los wheel events del overlay con preventDefault
+  // Lenis smooth scroll
   useEffect(() => {
-    if (showOverlay) return
-    gsap.registerPlugin(ScrollTrigger)
     const lenis = new Lenis({ duration: 1.2 })
-    lenis.on('scroll', ScrollTrigger.update)
-    const tick = (time: number) => lenis.raf(time * 1000)
-    gsap.ticker.add(tick)
-    gsap.ticker.lagSmoothing(0)
-    return () => { gsap.ticker.remove(tick); lenis.destroy() }
-  }, [showOverlay])
+    let rafId: number
+    const raf = (t: number) => { lenis.raf(t); rafId = requestAnimationFrame(raf) }
+    rafId = requestAnimationFrame(raf)
+    return () => { cancelAnimationFrame(rafId); lenis.destroy() }
+  }, [])
 
   // Suppress unused warning — isFunder disponible para futuras secciones
   void isFunder
@@ -1169,11 +644,6 @@ export default function Home() {
 
       {/* Film Grain — fixed, inset-0, pointer-events-none, z-9999 */}
       <FilmGrain />
-
-      {/* Drop Countdown Overlay — z-10000, blocks site until launch */}
-      {showOverlay && (
-        <DropCountdownOverlay onGone={() => setShowOverlay(false)} />
-      )}
 
       {/* Easter Egg Modal — fixed inset-0 bg-black z-100, perfectamente centrado */}
       <AnimatePresence>
@@ -1186,11 +656,38 @@ export default function Home() {
         )}
       </AnimatePresence>
 
-      {/* ── Static Hero ── */}
-      <StaticHero />
+      {/* ── Hero ── */}
+      <Hero onEasterEgg={() => setEggOpen(true)} />
 
-      {/* ── Grid bidireccional: 3 columnas × scroll vertical interno ── */}
-      <HorizontalNav onEasterEgg={() => setEggOpen(true)} />
+      {/* ── Sección 1: TU IDENTIDAD / NO SE NEGOCIA + IDENTITY (Negro) ── */}
+      <PhraseCard
+        line1="TU IDENTIDAD"
+        line2="NO SE NEGOCIA"
+        product={PRODUCTS[0]}
+      />
+
+      {/* ── Sección 2: VOS PONÉS / LAS REGLAS + YOUR RULES (Blanco) ── */}
+      <PhraseCard
+        line1="VOS PONÉS"
+        line2="LAS REGLAS"
+        product={PRODUCTS[1]}
+      />
+
+      {/* ── Historia ── espaciado masivo py-60 md:py-80 */}
+      <div style={{ paddingTop: 'clamp(160px,22vw,320px)' }}>
+        <Historia />
+      </div>
+
+      {/* ── Footer ── */}
+      <footer style={{
+        background: '#000', borderTop: '1px solid #080808',
+        padding: '40px 24px', textAlign: 'center',
+        marginTop: 'clamp(80px,12vw,160px)',
+      }}>
+        <p style={{ ...I, fontSize: 10, letterSpacing: '0.42em', textTransform: 'uppercase', color: '#0e0e0e' }}>
+          © 2026 Level · Drop 00 · Todos los derechos reservados
+        </p>
+      </footer>
 
     </main>
   )
