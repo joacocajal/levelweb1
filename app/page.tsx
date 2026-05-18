@@ -996,7 +996,7 @@ function DropCountdownOverlay({ onGone }: { onGone(): void }) {
     const el = scrollRef.current
     if (!el) return
     const handle = () => {
-      const p = Math.max(0, Math.min(1, (el.scrollTop - 80) / 780))
+      const p = Math.max(0, Math.min(1, (el.scrollTop - 80) / 520))
       setContentOp(1 - p)
       setSloganOp(p)
     }
@@ -1040,7 +1040,7 @@ function DropCountdownOverlay({ onGone }: { onGone(): void }) {
         }} />
 
         {/* Tall spacer enables scroll inside the fixed layer */}
-        <div style={{ height: '400vh' }}>
+        <div style={{ height: '250vh' }}>
           <div style={{
             position: 'sticky', top: 0, height: '100vh',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -1057,9 +1057,9 @@ function DropCountdownOverlay({ onGone }: { onGone(): void }) {
               opacity: contentOp,
             }}>
               <Image
-                src="/logorojosf.png" alt="LEVEL" width={700} height={700} priority
+                src="/img/logorojosf.png" alt="LEVEL" width={700} height={700} priority
                 style={{
-                  width: 'clamp(180px, min(46vw, 36vh), 420px)',
+                  width: 'clamp(160px, min(38vw, 36vh), 400px)',
                   height: 'auto', objectFit: 'contain',
                   filter: 'drop-shadow(0 0 80px rgba(192,57,43,0.35)) drop-shadow(0 0 30px rgba(192,57,43,0.2))',
                 }}
@@ -1107,19 +1107,14 @@ function DropCountdownOverlay({ onGone }: { onGone(): void }) {
               </p>
             </div>
 
-            {/* Scroll hint — anclado al fondo del sticky, sin interferir con el contenido */}
+            {/* Scroll hint — fuera del flex de contenido, siempre en el fondo */}
             <div style={{
-              position: 'absolute', bottom: 36, left: 0, right: 0,
-              display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12,
-              opacity: contentOp * 0.7, pointerEvents: 'none',
+              position: 'absolute', bottom: 32, left: 0, right: 0,
+              display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10,
+              opacity: contentOp, pointerEvents: 'none',
             }}>
-              <span style={{
-                ...I, fontSize: 9, letterSpacing: '0.55em', textTransform: 'uppercase',
-                color: '#3a3a3a',
-                padding: '6px 20px',
-                border: '1px solid #1a1a1a',
-              }}>Scroll</span>
-              <div style={{ width: 1, height: 40, background: `linear-gradient(to bottom, ${RED}, transparent)` }} />
+              <span style={{ ...I, fontSize: 9, letterSpacing: '0.5em', textTransform: 'uppercase', color: '#0e0e0e' }}>Scroll</span>
+              <div style={{ width: 1, height: 48, background: `linear-gradient(to bottom, ${RED}, transparent)` }} />
             </div>
 
             {/* Slogan (fades in on scroll) */}
