@@ -1056,12 +1056,11 @@ function DropCountdownOverlay({ onGone }: { onGone(): void }) {
               gap: 'clamp(16px, 3vh, 36px)',
               opacity: contentOp,
             }}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src="/logorojosf.png" alt="LEVEL"
+              <Image
+                src="/logorojosf.png" alt="LEVEL" width={700} height={700} priority
                 style={{
                   width: 'clamp(180px, min(46vw, 36vh), 420px)',
-                  height: 'auto', display: 'block',
+                  height: 'auto', objectFit: 'contain',
                   filter: 'drop-shadow(0 0 80px rgba(192,57,43,0.35)) drop-shadow(0 0 30px rgba(192,57,43,0.2))',
                 }}
               />
